@@ -1,0 +1,25 @@
+{% extends "taskmanager/base.html" %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h2>Профиль пользователя</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Информация о пользователе</h5>
+            <p class="card-text">
+                <strong>Имя пользователя:</strong> {{ user.username }}<br>
+                <strong>Email:</strong> {{ user.email }}<br>
+                <strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}<br>
+            </p>
+            <a href="{% url 'taskmanager:notification_settings' %}" class="btn btn-primary">
+                Настройки уведомлений
+            </a>
+            <a href="{% url 'accounts:logout' %}" class="btn btn-danger">
+                Выйти из аккаунта
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

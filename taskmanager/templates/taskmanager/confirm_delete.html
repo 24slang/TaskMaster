@@ -1,0 +1,17 @@
+{% extends "taskmanager/base.html" %}
+
+{% block title %}Удалить задачу{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Удалить задачу: {{ task.name }}</h1>
+
+    <p>Вы уверены, что хотите удалить эту задачу? Это действие нельзя отменить.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a href="{% url 'taskmanager:task_detail' task.id %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

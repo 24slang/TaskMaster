@@ -1,0 +1,43 @@
+{% extends "taskmanager/base.html" %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>{{ project.name }}</h1>
+
+    <!-- Участники проекта -->
+    <h3>Участники:</h3>
+    <ul>
+        {% for user in project.users.all %}
+            <li>{{ user.username }}</li>
+        {% empty %}
+            <li>Нет участников.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Редакторы проекта -->
+    <h3>Редакторы:</h3>
+    <ul>
+        {% for editor in project.editors.all %}
+            <li>{{ editor.username }}</li>
+        {% empty %}
+            <li>Нет редакторов.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Кнопки для управления проектом (только для создателя) -->
+    {% if request.user == project.created_by %}
+        <div class="mt-4">
+            <a href="{% url 'taskmanager:assign_editors' project.id %}" class="btn btn-warning">Назначить редакторов</a>
+            <a href="{% url 'taskmanager:edit_project' project.id %}" class="btn btn-warning">Редактировать проект</a>
+            <a href="{% url 'taskmanager:delete_project' project.id %}" class="btn btn-danger">Удалить проект</a>
+        </div>
+    {% endif %}
+
+    <!-- Кнопка для возврата к списку проектов -->
+    <div class="mt-4">
+        <a href="{% url 'taskmanager:project_list' %}" class="btn btn-secondary">Назад к списку проектов</a>
+    </div>
+</div>
+{% endblock %}

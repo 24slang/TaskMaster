@@ -1,0 +1,27 @@
+{% extends "taskmanager/base.html" %}
+
+{% block title %}Добавить участников в проект{% endblock %}
+
+{% block body %}
+
+    <!-- Сообщения об ошибках или успешном добавлении -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Форма для добавления участника -->
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="username">Имя пользователя:</label>
+        <input type="text" name="username" id="username" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить</button>
+    <a href="{% url 'taskmanager:project_detail' project.id %}" class="btn btn-secondary">Отмена</a>
+</form>
+</div>
+{% endblock %}

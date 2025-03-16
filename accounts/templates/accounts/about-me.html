@@ -1,0 +1,15 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+    About me
+{% endblock %}
+
+
+{% block body %}
+    <h1>Информация о пользователе:</h1>
+    {% if user.is_authenticated %}
+        Главная страница
+    {% else %}
+        <h2>User is anonymous</h2>
+    {% endif %}
+{% endblock %}

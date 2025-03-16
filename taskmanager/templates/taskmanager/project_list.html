@@ -1,0 +1,88 @@
+{% extends "taskmanager/base.html" %}
+
+{% block title %}Список проектов{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Список проектов</h1>
+
+    <!-- Кнопка для создания нового проекта -->
+    <a href="{% url 'taskmanager:create_project' %}" class="btn btn-primary mb-4">
+        Создать новый проект
+    </a>
+
+    <!-- Список проектов -->
+    <div class="list-group">
+        {% for project in page_obj %}
+            <div class="list-group-item mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>
+                        <a href="{% url 'taskmanager:project_detail' project.id %}">{{ project.name }}</a>
+                    </h3>
+                    <!-- Кнопки управления проектом (только для создателя) -->
+                    {% if request.user == project.created_by %}
+                        <div>
+                            <a href="{% url 'taskmanager:edit_project' project.id %}" class="btn btn-sm btn-warning">Редактировать</a>
+                            <a href="{% url 'taskmanager:delete_project' project.id %}" class="btn btn-sm btn-danger">Удалить</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Список задач проекта -->
+                <ul class="list-group mt-2">
+                    {% for task in project.task_set.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>{{ task.title }}</h5>
+                                <p class="mb-1">{{ task.description }}</p>
+                                <small class="text-muted">Срок выполнения: {{ task.due_date }}</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-{{ task.get_status_color }} me-2">{{ task.get_status_display }}</span>
+                                <!-- Кнопки управления задачей (только для создателя, редакторов и назначенных) -->
+                                {% if request.user == project.created_by or request.user in project.editors.all or request.user == task.assigned_to %}
+                                    <a href="{% url 'taskmanager:edit_task' task.id %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                                    <a href="{% url 'taskmanager:delete_task' task.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">Нет задач в этом проекте.</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Кнопки для добавления участников и задач (только для создателя) -->
+                {% if request.user == project.created_by %}
+                    <div class="mt-3">
+                        <a href="{% url 'taskmanager:add_users_to_project' project.id %}" class="btn btn-sm btn-success">Добавить участников</a>
+                        <a href="{% url 'taskmanager:create_task' %}?project_id={{ project.id }}" class="btn btn-sm btn-info">Добавить задачу</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="list-group-item">
+                <p>Нет доступных проектов.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    <div class="pagination mt-4">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn btn-sm btn-outline-primary">&laquo; первая</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-primary">предыдущая</a>
+            {% endif %}
+
+            <span class="current">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-outline-primary">следующая</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-outline-primary">последняя &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "taskmanager/base.html" %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Мои задачи</h1>
+
+    <!-- Форма фильтрации -->
+    <form method="get" action="{% url 'taskmanager:task_list' %}" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <label for="status" class="form-label">Статус:</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">Все</option>
+                    <option value="todo">К выполнению</option>
+                    <option value="in_progress">В процессе</option>
+                    <option value="done">Выполнено</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="priority" class="form-label">Приоритет:</label>
+                <select name="priority" id="priority" class="form-select">
+                    <option value="">Все</option>
+                    <option value="high">Высокий</option>
+                    <option value="medium">Средний</option>
+                    <option value="low">Низкий</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="project" class="form-label">Проект:</label>
+                <select name="project" id="project" class="form-select">
+                    <option value="">Все</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="category" class="form-label">Категория:</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">Все</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="due_date" class="form-label">Срок выполнения до:</label>
+                <input type="date" name="due_date" id="due_date" class="form-control">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Фильтровать</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Список задач -->
+    <div class="list-group">
+        {% for task in tasks %}
+            <div class="list-group-item mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5><a href="{% url 'taskmanager:task_detail' task.id %}">{{ task.title }}</a></h5>
+                        <p class="mb-1">Приоритет: {{ task.get_priority_display }}</p>
+                        <p class="mb-1">Срок выполнения: {{ task.due_date }}</p>
+                        {% if task.project %}
+                            <p class="mb-1">Проект: {{ task.project.name }}</p>
+                        {% endif %}
+                        {% if task.category %}
+                            <p class="mb-1">Категория: {{ task.category.name }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="{% url 'taskmanager:edit_task' task.id %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                        <a href="{% url 'taskmanager:delete_task' task.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="list-group-item">
+                <p>Нет задач.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Кнопки для создания задачи и проекта -->
+    <div class="mt-4">
+        <a href="{% url 'taskmanager:create_task' %}" class="btn btn-success">Создать задачу</a>
+    </div>
+</div>
+{% endblock %}
