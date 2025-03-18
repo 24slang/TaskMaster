@@ -5,4 +5,4 @@ def create_notification(user, message):
     """
     Создает уведомление для пользователя.
     """
-    Notification.objects.create(user=user, message=message)
+    Notification.objects.create(users=user, message=message)

@@ -72,9 +72,14 @@ class Category(models.Model):
 
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    users = models.ManyToManyField(User, related_name='notifications')
+    read_by = models.ManyToManyField(User, related_name='read_notifications', blank=True)
     message = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Уведомление для {self.user.username}: {self.message}"
+
+    def is_read_by_user(self, user):
+        """Проверяет, прочитал ли пользователь уведомление."""
+        return self.read_by.filter(id=user.id).exists()

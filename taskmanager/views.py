@@ -26,11 +26,11 @@ def create_task(request):
                 task.project = project
             task.save()
 
-            # Отправка уведомлений всем участникам проекта
             if project:
                 message = f"В проекте '{project.name}' создана новая задача: '{task.title}'."
                 for user in project.users.all():
-                    Notification.objects.create(user=user, message=message)
+                    notification = Notification.objects.create(message=message)
+                    notification.users.add(user)
 
             return redirect('taskmanager:task_list')
     else:
@@ -102,7 +102,6 @@ def task_detail(request, task_id):
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
 
-    # Проверка прав доступа
     if task.project:
         can_edit = (
             request.user == task.project.created_by or
@@ -120,7 +119,6 @@ def edit_task(request, task_id):
         if form.is_valid():
             form.save()
 
-            # Отправка уведомлений всем участникам проекта
             if task.project:
                 message = f"В проекте '{task.project.name}' изменена задача: '{task.title}'."
                 for user in task.project.users.all():
@@ -152,12 +150,10 @@ def create_project(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST)
         if form.is_valid():
-            # Создаем проект и назначаем создателя
             project = form.save(commit=False)
             project.created_by = request.user
             project.save()
 
-            # Добавляем создателя в список участников
             project.users.add(request.user)
 
             return redirect('taskmanager:project_list')
@@ -168,7 +164,7 @@ def create_project(request):
 
 @login_required
 def project_list(request):
-    projects = Project.objects.filter(users=request.user) | Project.objects.filter(editors=request.user)
+    projects = Project.objects.filter(users=request.user)
 
     paginator = Paginator(projects, 10)
     page_number = request.GET.get('page')
@@ -220,28 +216,21 @@ def delete_project(request, project_id):
 
 @login_required
 def add_users_to_project(request, project_id):
-    # Получаем проект
     project = get_object_or_404(Project, id=project_id)
 
-    # Проверяем, что текущий пользователь — создатель проекта
     if request.user != project.created_by:
         messages.error(request, "Только создатель проекта может добавлять участников.")
         return redirect('taskmanager:project_detail', project_id=project.id)
 
-    # Обработка POST-запроса
     if request.method == 'POST':
         username = request.POST.get('username')
         try:
-            # Ищем пользователя по никнейму
             user = User.objects.get(username=username)
-            # Добавляем пользователя в проект
             project.users.add(user)
             messages.success(request, f"Пользователь {user.username} добавлен в проект.")
         except User.DoesNotExist:
-            # Если пользователь не найден
             messages.error(request, f"Пользователь с именем '{username}' не найден.")
 
-    # Отображаем шаблон с формой
     return render(request, 'taskmanager/add_users_to_project.html', {
         'project': project,
     })
@@ -270,12 +259,6 @@ def assign_editors(request, project_id):
 
 
 @login_required
-def view_notifications(request):
-    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'taskmanager/notifications.html', {'notifications': notifications})
-
-
-@login_required
 def notification_settings(request):
     if request.method == 'POST':
         form = NotificationSettingsForm(request.POST, instance=request.user)
@@ -300,5 +283,9 @@ def mark_notification_as_read(request, notification_id):
 
 @login_required
 def notifications(request):
-    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    notifications = Notification.objects.filter(users=request.user).order_by('-created_at')
+
+    for notification in notifications:
+        notification.read_by.add(request.user)
+
     return render(request, 'taskmanager/notifications.html', {'notifications': notifications})
