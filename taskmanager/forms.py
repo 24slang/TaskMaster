@@ -17,17 +17,8 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['project'].queryset = Project.objects.filter(users=user)
+        self.fields['project'].queryset = Project.objects.filter(editors=user)
         self.fields['category'].queryset = Category.objects.filter(user=user)
-
-    def clean(self):
-        cleaned_data = super().clean()
-        project = cleaned_data.get('project')
-        category = cleaned_data.get('category')
-
-        if project and category:
-            raise forms.ValidationError("Выберите только проект ИЛИ категорию.")
-        return cleaned_data
 
 
 class ProjectForm(forms.ModelForm):

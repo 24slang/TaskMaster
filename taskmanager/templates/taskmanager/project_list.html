@@ -8,81 +8,154 @@
 
     <!-- Кнопка для создания нового проекта -->
     <a href="{% url 'taskmanager:create_project' %}" class="btn btn-primary mb-4">
-        Создать новый проект
+        <i class="fas fa-plus"></i> Создать новый проект
     </a>
 
     <!-- Список проектов -->
     <div class="list-group">
         {% for project in page_obj %}
-            <div class="list-group-item mb-3">
+            <div class="list-group-item mb-3 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3>
-                        <a href="{% url 'taskmanager:project_detail' project.id %}">{{ project.name }}</a>
-                    </h3>
+                    <div class="d-flex align-items-center">
+                        <!-- Название проекта с иконкой -->
+                        <h3 class="mb-0">
+                            <a href="{% url 'taskmanager:project_detail' project.id %}" class="text-decoration-none text-dark">
+                                <i class="fas fa-project-diagram me-2"></i>{{ project.name }}
+                            </a>
+                        </h3>
+                        <!-- Кнопка для раскрытия задач -->
+                        <button class="btn btn-sm btn-outline-secondary ms-3 toggle-tasks" data-project-id="{{ project.id }}">
+                            <span class="arrow">▶</span>
+                        </button>
+                    </div>
                     <!-- Кнопки управления проектом (только для создателя) -->
                     {% if request.user == project.created_by %}
                         <div>
-                            <a href="{% url 'taskmanager:edit_project' project.id %}" class="btn btn-sm btn-warning">Редактировать</a>
-                            <a href="{% url 'taskmanager:delete_project' project.id %}" class="btn btn-sm btn-danger">Удалить</a>
+                            <a href="{% url 'taskmanager:edit_project' project.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </a>
+                            <a href="{% url 'taskmanager:delete_project' project.id %}" class="btn btn-sm btn-danger ms-2">
+                                <i class="fas fa-trash"></i> Удалить
+                            </a>
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- Список задач проекта -->
-                <ul class="list-group mt-2">
-                    {% for task in project.task_set.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5>{{ task.title }}</h5>
-                                <p class="mb-1">{{ task.description }}</p>
-                                <small class="text-muted">Срок выполнения: {{ task.due_date }}</small>
-                            </div>
-                            <div>
-                                <span class="badge bg-{{ task.get_status_color }} me-2">{{ task.get_status_display }}</span>
-                                <!-- Кнопки управления задачей (только для создателя, редакторов и назначенных) -->
-                                {% if request.user == project.created_by or request.user in project.editors.all or request.user == task.assigned_to %}
-                                    <a href="{% url 'taskmanager:edit_task' task.id %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
-                                    <a href="{% url 'taskmanager:delete_task' task.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
-                                {% endif %}
-                            </div>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">Нет задач в этом проекте.</li>
-                    {% endfor %}
-                </ul>
+                <!-- Список задач проекта (скрыт по умолчанию) -->
+                <div id="tasks-{{ project.id }}" class="tasks-list mt-3" style="display: none;">
+                    <ul class="list-group">
+                        {% for task in project.task_set.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center shadow-sm mb-2">
+                                <div>
+                                    <h5 class="mb-1">{{ task.title }}</h5>
+                                    <p class="mb-1 text-muted">{{ task.description }}</p>
+                                    <small class="text-muted">Срок выполнения: {{ task.due_date }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-{{ task.get_status_color }} me-2">{{ task.get_status_display }}</span>
+                                    <!-- Кнопки управления задачей (только для создателя, редакторов и назначенных) -->
+                                    {% if request.user == project.created_by or request.user in project.editors.all or request.user == task.assigned_to %}
+                                        <a href="{% url 'taskmanager:edit_task' task.id %}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-edit"></i> Редактировать
+                                        </a>
+                                        <a href="{% url 'taskmanager:delete_task' task.id %}" class="btn btn-sm btn-outline-danger ms-2">
+                                            <i class="fas fa-trash"></i> Удалить
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">Нет задач в этом проекте.</li>
+                        {% endfor %}
+                    </ul>
 
-                <!-- Кнопки для добавления участников и задач (только для создателя) -->
-                {% if request.user == project.created_by %}
-                    <div class="mt-3">
-                        <a href="{% url 'taskmanager:add_users_to_project' project.id %}" class="btn btn-sm btn-success">Добавить участников</a>
-                        <a href="{% url 'taskmanager:create_task' %}?project_id={{ project.id }}" class="btn btn-sm btn-info">Добавить задачу</a>
-                    </div>
-                {% endif %}
+                    <!-- Кнопки для добавления участников и задач (только для создателя) -->
+                    {% if request.user == project.created_by %}
+                        <div class="mt-3">
+                            <a href="{% url 'taskmanager:add_users_to_project' project.id %}" class="btn btn-sm btn-success">
+                                <i class="fas fa-user-plus"></i> Добавить участников
+                            </a>
+                            <a href="{% url 'taskmanager:create_task' %}?project_id={{ project.id }}" class="btn btn-sm btn-info ms-2">
+                                <i class="fas fa-tasks"></i> Добавить задачу
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         {% empty %}
-            <div class="list-group-item">
+            <div class="list-group-item text-muted">
                 <p>Нет доступных проектов.</p>
             </div>
         {% endfor %}
     </div>
 
     <!-- Пагинация -->
-    <div class="pagination mt-4">
+    <div class="pagination mt-4 d-flex justify-content-center">
         <span class="step-links">
             {% if page_obj.has_previous %}
                 <a href="?page=1" class="btn btn-sm btn-outline-primary">&laquo; первая</a>
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-primary">предыдущая</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-primary ms-2">предыдущая</a>
             {% endif %}
 
-            <span class="current">
+            <span class="current mx-3">
                 Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
             </span>
 
             {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-outline-primary">следующая</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-outline-primary">последняя &raquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-outline-primary ms-2">последняя &raquo;</a>
             {% endif %}
         </span>
     </div>
 </div>
+
+<!-- Подключение Font Awesome для иконок -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+<!-- JavaScript для раскрытия/скрытия задач -->
+<script>
+    document.querySelectorAll('.toggle-tasks').forEach(button => {
+        button.addEventListener('click', () => {
+            const projectId = button.getAttribute('data-project-id');
+            const tasksList = document.getElementById(`tasks-${projectId}`);
+            const arrow = button.querySelector('.arrow');
+
+            if (tasksList.style.display === 'none') {
+                tasksList.style.display = 'block';
+                arrow.textContent = '▼';
+            } else {
+                tasksList.style.display = 'none';
+                arrow.textContent = '▶';
+            }
+        });
+    });
+</script>
+
+<!-- Стили для улучшения внешнего вида -->
+<style>
+    .list-group-item {
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .list-group-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tasks-list {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .btn-sm {
+        font-size: 0.875rem;
+    }
+
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5em 0.75em;
+    }
+</style>
 {% endblock %}

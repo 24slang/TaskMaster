@@ -52,7 +52,7 @@ def create_category(request):
         if name:
             Category.objects.create(name=name, user=request.user)
 
-            next_url = request.GET.get('next', 'taskmanager:create_task')
+            next_url = request.GET.get('next', 'taskmanager:task_list')
             return redirect(next_url)
 
     return render(request, 'taskmanager/create_category.html')
@@ -264,7 +264,7 @@ def notification_settings(request):
         form = NotificationSettingsForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('taskmanager:profile')  # Перенаправление на страницу профиля
+            return redirect('accounts:profile')  # Перенаправление на страницу профиля
     else:
         form = NotificationSettingsForm(instance=request.user)
     return render(request, 'taskmanager/notification_settings.html', {'form': form})

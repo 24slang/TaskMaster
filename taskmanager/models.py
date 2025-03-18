@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 
 
 User = get_user_model()
@@ -34,11 +33,6 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
-
-    def clean(self):
-        if self.project and self.category:
-            raise ValidationError("Задача не может быть привязана одновременно к проекту и категории.")
-        super().clean()
 
     def get_status_color(self):
         if self.status == 'todo':

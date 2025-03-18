@@ -13,6 +13,14 @@
                     <!-- Форма входа -->
                     <form method="post">
                         {% csrf_token %}
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
 
                         <!-- Поле для имени пользователя -->
                         <div class="form-group mb-3">
