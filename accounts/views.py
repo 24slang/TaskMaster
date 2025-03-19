@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, CreateView
 
+from taskmanager.models import NotificationSettings
+
 
 class AboutMeView(LoginRequiredMixin, TemplateView):
     template_name = "accounts/about-me.html"
@@ -30,6 +32,8 @@ class RegisterView(CreateView):
             username=username,
             password=password,
         )
+
+        NotificationSettings.objects.create(user=user)
 
         login(request=self.request, user=user)
 

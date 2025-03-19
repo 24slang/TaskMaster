@@ -17,7 +17,7 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['project'].queryset = Project.objects.filter(editors=user)
+        self.fields['project'].queryset = Project.objects.filter(users=user)
         self.fields['category'].queryset = Category.objects.filter(user=user)
 
 

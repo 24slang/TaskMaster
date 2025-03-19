@@ -6,7 +6,8 @@ from django.contrib import messages
 from .forms import TaskForm, ProjectForm, NotificationSettingsForm
 from .models import Task, Project, Category, Notification
 from django.contrib.auth import get_user_model
-from .utils import create_notification
+from .utils import send_notification
+
 User = get_user_model()
 
 
@@ -28,9 +29,7 @@ def create_task(request):
 
             if project:
                 message = f"В проекте '{project.name}' создана новая задача: '{task.title}'."
-                for user in project.users.all():
-                    notification = Notification.objects.create(message=message)
-                    notification.users.add(user)
+                send_notification(project.users.all(), message, 'new_task')
 
             return redirect('taskmanager:task_list')
     else:
@@ -118,11 +117,11 @@ def edit_task(request, task_id):
         form = TaskForm(request.user, request.POST, instance=task)
         if form.is_valid():
             form.save()
-
+            print(task.project)
             if task.project:
                 message = f"В проекте '{task.project.name}' изменена задача: '{task.title}'."
-                for user in task.project.users.all():
-                    Notification.objects.create(user=user, message=message)
+                print("ПРОВЕРКА")
+                send_notification(task.project.users.all(), message, 'task_change')
 
             return redirect('taskmanager:task_detail', task_id=task.id)
     else:
@@ -264,26 +263,17 @@ def notification_settings(request):
         form = NotificationSettingsForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('accounts:profile')  # Перенаправление на страницу профиля
+            messages.success(request, 'Настройки уведомлений успешно обновлены.')
+            return redirect('accounts:profile')
     else:
         form = NotificationSettingsForm(instance=request.user)
+
     return render(request, 'taskmanager/notification_settings.html', {'form': form})
 
 
 @login_required
-def mark_notification_as_read(request, notification_id):
-    """
-    Отмечает уведомление как прочитанное.
-    """
-    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
-    notification.is_read = True
-    notification.save()
-    return redirect('taskmanager:notifications')
-
-
-@login_required
 def notifications(request):
-    notifications = Notification.objects.filter(users=request.user).order_by('-created_at')
+    notifications = Notification.objects.filter(users=request.user).exclude(read_by=request.user).order_by('-created_at')
 
     for notification in notifications:
         notification.read_by.add(request.user)

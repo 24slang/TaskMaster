@@ -12,7 +12,8 @@ from .views import (
     edit_project,
     delete_project,
     add_users_to_project,
-    assign_editors, notification_settings, mark_notification_as_read,
+    assign_editors,
+    notification_settings,
     notifications,
 )
 
@@ -40,7 +41,5 @@ urlpatterns = [
     path('project/<int:project_id>/assign-editors/', assign_editors, name='assign_editors'),
 
     path('notifications/', notifications, name='notifications'),
-    path('notifications/mark-as-read/<int:notification_id>/', mark_notification_as_read,
-         name='mark_notification_as_read'),
     path('notification-settings/', notification_settings, name='notification_settings'),
 ]

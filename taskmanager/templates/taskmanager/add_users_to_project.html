@@ -4,14 +4,6 @@
 
 {% block body %}
 
-    <!-- Сообщения об ошибках или успешном добавлении -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <!-- Форма для добавления участника -->
 <form method="post">
