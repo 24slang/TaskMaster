@@ -45,3 +45,4 @@
    ```bash
    git clone https://github.com/24slang/TaskMaster
    cd TaskMaster
+   python manage.py runserver
