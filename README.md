@@ -42,8 +42,6 @@
 - Django 4.0 или выше
 - Установленные зависимости из `requirements.txt`
 
-### Шаги для установки
-1. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/24slang/TaskMaster
    cd TaskMaster
