@@ -9,6 +9,13 @@
         <i class="bi bi-funnel"></i> Фильтры
     </button>
 
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Поиск по названию" value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </div>
+    </form>
+
     <!-- Выдвигающаяся панель фильтров -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
         <div class="offcanvas-header">
@@ -69,7 +76,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5><a href="{% url 'taskmanager:task_detail' task.id %}" class="text-decoration-none text-dark">{{ task.title }}</a></h5>
-                        <p class="mb-1 text-muted">Приоритет: <span class="badge bg-{{ task.get_priority_color }}">{{ task.get_priority_display }}</span></p>
+                        <p class="mb-1 text-muted">Приоритет: <span>{{ task.get_priority_display }}</span></p>
                         <p class="mb-1 text-muted">Срок выполнения: {{ task.due_date }}</p>
                         {% if task.project %}
                             <p class="mb-1 text-muted">Проект: <span class="badge bg-secondary">{{ task.project.name }}</span></p>

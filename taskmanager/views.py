@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils import timezone
+
 from .forms import TaskForm, ProjectForm, NotificationSettingsForm
 from .models import Task, Project, Category, Notification
 from django.contrib.auth import get_user_model
@@ -61,6 +65,10 @@ def create_category(request):
 def task_list(request):
     tasks = Task.objects.filter(created_by=request.user)
 
+    search_query = request.GET.get('search')
+    if search_query:
+        tasks = tasks.filter(title__icontains=search_query)
+
     status = request.GET.get('status')
     if status:
         tasks = tasks.filter(status=status)
@@ -80,6 +88,28 @@ def task_list(request):
     due_date = request.GET.get('due_date')
     if due_date:
         tasks = tasks.filter(due_date__lte=due_date)
+
+    now = timezone.now()
+    deadline_threshold = now + timedelta(days=1)
+
+    if request.user.notify_deadlines:
+        tasks_with_deadline = Task.objects.filter(
+            due_date__lte=deadline_threshold,
+            due_date__gt=now,
+            created_by=request.user,
+        )
+        if tasks_with_deadline:
+            for task in tasks_with_deadline:
+                time_left = task.due_date - now
+                hours, remainder = divmod(time_left.seconds, 3600)
+                minutes, _ = divmod(remainder, 60)
+
+                message = f"Дедлайн задачи '{task.title}' истекает через {hours} часов {minutes} минут."
+                messages.warning(request, message)
+        else:
+            messages.warning(request, "Приближающихся дедлайнов нет.")
+    else:
+        messages.warning(request, "Уведомления о приближающихся дедлайнах отключены пользователем.")
 
     projects = Project.objects.filter(users=request.user)
     categories = Category.objects.filter(user=request.user)

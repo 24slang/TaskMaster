@@ -4,7 +4,6 @@
 
 {% block body %}
 
-
     <!-- Форма для добавления участника -->
 <form method="post">
     {% csrf_token %}
@@ -15,5 +14,5 @@
     <button type="submit" class="btn btn-primary">Добавить</button>
     <a href="{% url 'taskmanager:project_detail' project.id %}" class="btn btn-secondary">Отмена</a>
 </form>
-</div>
+
 {% endblock %}
