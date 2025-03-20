@@ -45,5 +45,5 @@
 ### Шаги для установки
 1. Клонируйте репозиторий:
    ```bash
-   git clone https://github.com/ваш-username/TaskMaster.git
+   git clone https://github.com/24slang/TaskMaster
    cd TaskMaster
