@@ -61,10 +61,13 @@ def create_category(request):
     return render(request, 'taskmanager/create_category.html')
 
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 @login_required
 def task_list(request):
     tasks = Task.objects.filter(created_by=request.user)
 
+    # Фильтрация задач
     search_query = request.GET.get('search')
     if search_query:
         tasks = tasks.filter(title__icontains=search_query)
@@ -88,6 +91,16 @@ def task_list(request):
     due_date = request.GET.get('due_date')
     if due_date:
         tasks = tasks.filter(due_date__lte=due_date)
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(tasks, 10)
+
+    try:
+        tasks = paginator.page(page)
+    except PageNotAnInteger:
+        tasks = paginator.page(1)
+    except EmptyPage:
+        tasks = paginator.page(paginator.num_pages)
 
     now = timezone.now()
     deadline_threshold = now + timedelta(days=1)
